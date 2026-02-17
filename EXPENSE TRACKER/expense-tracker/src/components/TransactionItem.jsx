@@ -1,5 +1,9 @@
-const TransactionItem = ( {transaction, formatMoney }) => {
-    const { title, amount, type, category } = transaction;
+import { useContext } from "react";
+import { CurrencyContext } from "../CurrencyContext";
+
+const TransactionItem = ( {transaction, onDelete, onEdit }) => {
+    const { formatMoney } = useContext(CurrencyContext);
+    const { id, title, amount, type, category } = transaction;
 
     return (
         <div className="transaction-item">
@@ -12,6 +16,20 @@ const TransactionItem = ( {transaction, formatMoney }) => {
                 {type === "expense" ? "-" : "+"}
                 {formatMoney(Math.abs(amount))}
             </span>
+
+            <button 
+                className="delete-btn" 
+                onClick={() => onDelete(transaction.id)}
+            >
+                ✖
+            </button>
+
+            <button 
+                className="edit-btn"
+                onClick={() => onEdit(transaction.id)}
+            >
+                Edit
+            </button>
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import TransactionItem from "./TransactionItem";
 
-const TransactionList = ({ transactions = [], formatMoney = () => "" }) => {
+const TransactionList = ({ transactions = [], onDelete, onEdit }) => {
     return (
         <div className="transactions">
             <h3>Transactions</h3>
@@ -12,7 +12,8 @@ const TransactionList = ({ transactions = [], formatMoney = () => "" }) => {
                 <TransactionItem 
                     key={tx.id} 
                     transaction={tx}
-                    formatMoney={formatMoney} 
+                    onDelete={onDelete} 
+                    onEdit={onEdit}
                 />
             ))
             )}

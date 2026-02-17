@@ -1,4 +1,8 @@
-const Balance = ({ balance, income, expense,formatMoney }) => {
+import { useContext } from "react";
+import { CurrencyContext } from "../CurrencyContext";
+
+const Balance = ({ balance, income, expense }) => {
+    const { formatMoney } = useContext(CurrencyContext);
     return (
         <div className="balance">
            <h2>Balance</h2> 

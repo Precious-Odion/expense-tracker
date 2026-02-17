@@ -3,19 +3,19 @@ import { createContext, useState } from "react";
 export const CurrencyContext = createContext();
 
 export const CurrencyProvider = ({ children }) => {
-    const [currency, setCurrency] = useState("GBP");
+    const [currency, setCurrency] = useState("USD");
 
-    const currencies = {
-        NGN: { symbol: "₦", locale: "en-NG" },
-        USD: { symbol: "$", locale: "en-US" },
-        EUR: { symbol: "€", locale: "en-DE" },
-        GBP: { symbol: "£", locale: "en-GB" },
+    const localeMap = {
+        NGN: "en-NG",
+        USD: "en-US",
+        EUR: "en-DE",
+        GBP: "en-GB",
     };
 
     const formatMoney = (amount) => {
-        return new Intl.NumberFormat(currencies[currency].locale, {
+        return new Intl.NumberFormat(localeMap[currency], {
             style: "currency",
-            currency: currency,
+            currency,
         }).format(amount);
     };
 

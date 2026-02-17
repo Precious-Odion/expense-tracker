@@ -1,4 +1,9 @@
-const Header = ({ balance, onAddClick, currency, setCurrency, formatMoney }) => {
+import { useContext } from "react";
+import { CurrencyContext } from "../CurrencyContext";
+
+
+const Header = ({ balance, onAddClick }) => {
+    const { currency, setCurrency, formatMoney } = useContext(CurrencyContext)
     return (
         <header className="header-section">
             <h1>Expense Tracker</h1>
@@ -10,8 +15,9 @@ const Header = ({ balance, onAddClick, currency, setCurrency, formatMoney }) => 
                 </div>
                 
                 <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="currency-select"
                 >
                     <option value="NGN">₦ NGN</option>
                     <option value="USD">$ USD</option>

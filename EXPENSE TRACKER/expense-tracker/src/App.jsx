@@ -7,10 +7,45 @@ import Balance from "./components/Balance";
 
 const App = () => {
   const [transactions, setTransactions] = useState([]);
+  const [deletedTransaction, setDeletedTransaction] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
   const [currency, setCurrency] = useState("USD");
   const addTransaction = (transaction) => {
     setTransactions([...transactions, transaction]);
+    closeModal();
+  };
+
+  const deleteTransaction = (id)=> {
+    const txToDelete = transactions.find((tx) => tx.id === id);
+    setDeletedTransaction(txToDelete);
+    setTransactions(transactions.filter((tx) => tx.id !== id));
+  };
+
+  const undoDelete = () => {
+    if (deletedTransaction) {
+      setTransactions([...transactions, deletedTransaction]);
+      setDeletedTransaction(null);
+    }
+  };
+
+  const startEdit = (transaction) => {
+    setEditingTransaction(transaction);
+    setShowModal(true);
+  };
+
+  const updateTransaction = (updatedTx) => {
+    setTransactions(
+      transactions.map((tx) =>
+        tx.id === updatedTx.id ? updatedTx : tx
+      )
+    );
+    closeModal();
+    setEditingTransaction(null);
   }
 
   const formatMoney = (amount) => {
@@ -22,10 +57,6 @@ const App = () => {
       }
     ).format(amount);
   };
-
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
-
 
   const income = transactions
       .filter(tx => tx.amount > 0)
@@ -59,16 +90,29 @@ const App = () => {
         <div className="modal-overlay">
           <div className="modal">
             <TransactionForm
-              onAdd={(tx) => {
-                addTransaction(tx);
+              onAdd={(tx) => 
+                {addTransaction(tx);
                 closeModal();
               }}
+              onUpdate={(tx) => {
+                updateTransaction(tx);
+                closeModal();
+                setEditingTransaction(null);
+              }}
+              editingTransaction={editingTransaction}
             />
 
             <button className="close-btn" onClick={closeModal}>
               Close
             </button>
           </div>
+        </div>
+      )}
+
+      {deletedTransaction && (
+        <div className="undo-notice">
+          Transaction deleted.{" "}
+          <button onClick={undoDelete}>Undo</button>
         </div>
       )}
 
@@ -83,7 +127,8 @@ const App = () => {
         <Sidebar />
         <TransactionList 
           transactions={transactions}
-          formatMoney={formatMoney} 
+          onDelete={deleteTransaction}
+          onEdit={startEdit}
         />
       </div>
     </div>

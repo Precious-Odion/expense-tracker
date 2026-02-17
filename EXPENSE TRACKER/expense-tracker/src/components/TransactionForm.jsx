@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const TransactionForm = ({ onAdd }) => {
+const TransactionForm = ({ onAdd, onUpdate, editingTransaction }) => {
     const [title, setTitle] = useState("");
     const [amount, setAmount] = useState("");
     const [type, setType] = useState("income");
@@ -10,21 +10,27 @@ const TransactionForm = ({ onAdd }) => {
         e.preventDefault();
 
         if (!title || !amount)  return;
-    
-    onAdd({
-        id: Date.now(),
-        title,
-        amount: Number(amount) * (type === "expense" ? -1 : 1),
-        type,
-        category,
-        date: new Date().toISOString().split("T")[0],
-    });
+        
+        const transactionData = {
+          id: editingTransaction ? editingTransaction.id :Date.now(),
+          title,
+          amount: Number(amount) * (type === "expense" ? -1 : 1),
+          type,
+          category,
+          date: new Date().toISOString().split("T")[0],
+        };
 
-    setTitle("");
-    setAmount("");
-    setType("income");
-    setCategory("General");
-};
+        if (editingTransaction) {
+          onUpdate(transactionData);
+        } else {
+          onAdd(transactionData);
+        }
+        
+        setTitle("");
+        setAmount("");
+        setType("income");
+        setCategory("General");
+    };
 
 return (
     <form className="transaction-form" onSubmit={handleSubmit}>
@@ -54,7 +60,9 @@ return (
         <option value="Utilities">Utilities</option>
       </select>
 
-      <button type="submit">Add Transaction</button>
+      <button type="submit">
+        {editingTransaction ? "Update Transaction" : "Add Transaction"}
+      </button>
     </form>
 );
 
