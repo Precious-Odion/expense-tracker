@@ -2,11 +2,16 @@ import { useContext } from "react";
 import { CurrencyContext } from "../CurrencyContext";
 
 
-const Header = ({ balance, onAddClick }) => {
+const Header = ({ balance, onMenuClick, onAddClick }) => {
     const { currency, setCurrency, formatMoney } = useContext(CurrencyContext)
     return (
         <header className="header-section">
-            <h1>Expense Tracker</h1>
+            <div className="header-left">
+                <button className="hamburger" onClick={onMenuClick}>
+                    &#9776;
+                </button>
+                <h1>Expense Tracker</h1>
+            </div>
 
             <div className="header-right">
                 <div className="balance">

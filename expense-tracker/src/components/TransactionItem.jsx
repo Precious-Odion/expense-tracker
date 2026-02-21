@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { CurrencyContext } from "../CurrencyContext";
 
-const TransactionItem = ( {transaction, onDelete, onEdit }) => {
+const TransactionItem = ({ transaction, onDelete, onEdit }) => {
     const { formatMoney } = useContext(CurrencyContext);
     const { id, title, amount, type, category } = transaction;
 
@@ -26,7 +26,7 @@ const TransactionItem = ( {transaction, onDelete, onEdit }) => {
 
             <button 
                 className="edit-btn"
-                onClick={() => onEdit(transaction.id)}
+                onClick={() => onEdit(transaction)}
             >
                 Edit
             </button>

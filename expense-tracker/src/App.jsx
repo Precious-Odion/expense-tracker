@@ -7,9 +7,13 @@ import Balance from "./components/Balance";
 
 const App = () => {
   const [transactions, setTransactions] = useState([]);
+  const [filterType, setFilterType] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
   const [deletedTransaction, setDeletedTransaction] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -35,13 +39,13 @@ const App = () => {
 
   const startEdit = (transaction) => {
     setEditingTransaction(transaction);
-    setShowModal(true);
+    openModal();
   };
 
   const updateTransaction = (updatedTx) => {
-    setTransactions(
-      transactions.map((tx) =>
-        tx.id === updatedTx.id ? updatedTx : tx
+    setTransactions((prevTransactions) =>
+        prevTransactions.map((tx) =>
+          tx.id === updatedTx.id ? updatedTx : tx
       )
     );
     closeModal();
@@ -68,6 +72,16 @@ const App = () => {
   
   const balance = income + expense;
 
+  const filteredTransactions = transactions.filter((tx) => {
+    const typeMatch =
+      filterType === "all" || tx.type === filterType;
+    
+    const categoryMatch =
+      filterCategory === "all" || tx.category === filterCategory;
+
+    return typeMatch && categoryMatch;
+  });
+
   const currencies = {
     NGN: { symbol: "₦", locale: "en-NG" },
     USD: { symbol: "$", locale: "en-US" },
@@ -83,23 +97,25 @@ const App = () => {
         currency={currency}
         setCurrency={setCurrency}
         formatMoney={formatMoney}
-        onAddClick={openModal} 
+        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        onAddClick={() => setShowModal(true)} 
       />
 
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
+
             <TransactionForm
+              editingTransaction={editingTransaction}
               onAdd={(tx) => 
                 {addTransaction(tx);
                 closeModal();
               }}
               onUpdate={(tx) => {
                 updateTransaction(tx);
-                closeModal();
                 setEditingTransaction(null);
+                closeModal();
               }}
-              editingTransaction={editingTransaction}
             />
 
             <button className="close-btn" onClick={closeModal}>
@@ -116,20 +132,52 @@ const App = () => {
         </div>
       )}
 
-      <Balance
-        balance={balance}
-        income={income}
-        expense={expense}
-        formatMoney={formatMoney}
-      />
+      <div className="layout">
+        {sidebarOpen && (
+          <Sidebar
+            income={income}
+            expense={expense}
+            balance={balance} 
+            filterType={filterType}
+            setFilterType={setFilterType}
+            filterCategory={filterCategory}
+            setFilterCategory={setFilterCategory}
+          />
+        )}
+       
+        {showFilters && (
+          <div className="filter-panel">
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">All Transactions</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
 
-      <div className="main">
-        <Sidebar />
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              <option value="food">Food</option>
+              <option value="transport">Transport</option>
+              <option value="shopping">Shopping</option>
+              <option value="salary">Salary</option>
+              <option value="utilities">Utilities</option> 
+              <option value="general">General</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        )}
+      <div className="content">
         <TransactionList 
-          transactions={transactions}
+          transactions={filteredTransactions}
           onDelete={deleteTransaction}
           onEdit={startEdit}
         />
+      </div>
       </div>
     </div>
   );

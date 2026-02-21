@@ -7,6 +7,8 @@ body {
 
 .app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .header-section {
@@ -38,30 +40,40 @@ body {
   cursor: pointer;
 }
 
-.main {
+.layout {
   display: flex;
+  flex: 1;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .sidebar {
   width: 220px;
   padding: 20px;
   border-right: 1px solid #222;
+  background: #1c1c1c;
+  height: calc(100vh - 80px);
+  animation: slideIn 0.25s ease;
+  padding-bottom: 120px;
+  overflow-y: auto;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .sidebar h3 {
   margin-top: 20px;
   font-size: 14px;
   color: gray;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  padding: 8px 0;
-  cursor: pointer;
 }
 
 .sidebar li.active {
@@ -154,6 +166,18 @@ body {
   cursor: pointer;
 }
 
+.filter-category,
+.filter-type {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
 .actions {
   display: flex;
   gap: 8px;
@@ -164,4 +188,69 @@ body {
   color: #4caf50;
   border: none;
   cursor: pointer;
+}
+
+.hamburger {
+  font-size: 30px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-balance {
+  margin-bottom: 25px;
+}
+
+.balance-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.balance-amount {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.balance-amount.negative {
+  color: #ff4d4f;
+}
+
+.balance-amount.positive {
+  color: white;
+}
+
+.income-value {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.expense-value {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+.income-expense p {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: white;
+  font-size: 16px;
+}
+
+.income-expense {
+  color: gray;
+  margin: 0;
+  font-size: 12px;
+}
+
+.income-expense span {
+  font-size: 12px;
+  font-weight: 500;
 }

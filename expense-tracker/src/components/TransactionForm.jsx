@@ -6,6 +6,19 @@ const TransactionForm = ({ onAdd, onUpdate, editingTransaction }) => {
     const [type, setType] = useState("income");
     const [category, setCategory] = useState("General");
 
+    useEffect(() => {
+      if (editingTransaction) {
+        setTitle(editingTransaction.title ?? "");
+        setAmount(
+          editingTransaction.amount !== undefined
+            ? Math.abs(editingTransaction.amount)
+            : ""
+        );
+        setType(editingTransaction.type ?? "income");
+        setCategory(editingTransaction.category ?? "General");
+      }
+    }, [editingTransaction]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -13,10 +26,10 @@ const TransactionForm = ({ onAdd, onUpdate, editingTransaction }) => {
         
         const transactionData = {
           id: editingTransaction ? editingTransaction.id :Date.now(),
-          title,
+          title: title,
           amount: Number(amount) * (type === "expense" ? -1 : 1),
-          type,
-          category,
+          type: type,
+          category: category,
           date: new Date().toISOString().split("T")[0],
         };
 
@@ -53,11 +66,14 @@ return (
       </select>
 
       <select value={category} onChange={(e) => setCategory(e.target.value)}>
-        <option value="General">General</option>
-        <option value="Food">Food</option>
-        <option value="Transport">Transport</option>
-        <option value="Rent">Rent</option>
-        <option value="Utilities">Utilities</option>
+        <option value="all">All Categories</option>
+        <option value="food">Food</option>
+        <option value="transport">Transport</option>
+        <option value="shopping">Shopping</option>
+        <option value="salary">Salary</option>
+        <option value="utilities">Utilities</option> 
+        <option value="general">General</option>
+        <option value="other">Other</option>
       </select>
 
       <button type="submit">
