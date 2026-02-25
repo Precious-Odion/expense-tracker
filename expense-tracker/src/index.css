@@ -92,6 +92,8 @@ body {
   padding: 14px;
   border-radius: 8px;
   margin-top: 12px;
+  position: relative;
+  overflow: hidden;
 }
 
 .amount.expense {
@@ -109,7 +111,27 @@ body {
   margin-top: 20px;
 }
 
-.transaction-form input,
+.amount-input {
+  font-weight: bold;
+  text-align: right;
+  font-size: 14px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #1a1a1a;
+  color: white;
+}
+.title-input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #1a1a1a;
+  color: white;
+  text-align: left;
+  font-weight: bold;
+  font-size: 14px;
+}
+
 .transaction-form select {
   padding: 8px;
   border-radius: 4px;
@@ -149,14 +171,6 @@ body {
   background: #333;
 }
 
-.delete-btn {
-  background: transparent;
-  border: none;
-  color: red;
-  cursor: pointer;
-  font-size: 16px;
-}
-
 .currency-select {
   background: #1a1a1a;
   color: white;
@@ -183,11 +197,26 @@ body {
   gap: 8px;
 }
 
-.edit-btn {
-  background: transparent;
-  color: #4caf50;
+.transaction-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.transaction-actions button {
+  background: #222;
   border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
+}
+.transaction-actions button:hover {
+  background: green;
 }
 
 .hamburger {
@@ -198,6 +227,24 @@ body {
   cursor: pointer;
 }
 
+.view-switch {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.view-switch button {
+  background: #222;
+  border: none;
+  padding: 8px 12px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.view-switch button:hover {
+  background: green;
+}
 .header-left {
   display: flex;
   align-items: center;
@@ -253,4 +300,13 @@ body {
 .income-expense span {
   font-size: 12px;
   font-weight: 500;
+}
+
+.chart {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  width: 300px;
+  height: 300px;
 }

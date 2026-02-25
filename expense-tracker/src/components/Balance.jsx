@@ -6,7 +6,7 @@ const Balance = ({ balance, income, expense }) => {
     return (
         <div className="balance">
            <h2>Balance</h2> 
-           <h1>{formatMoney(balance)}</h1>
+           <h1>{formatMoney(balance, currency)}</h1>
 
            <div className="summary">
             <div className="income">

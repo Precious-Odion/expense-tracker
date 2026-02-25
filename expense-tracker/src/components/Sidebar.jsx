@@ -65,6 +65,7 @@ const Sidebar = ({
                 <option value="salary">Salary</option>
                 <option value="utilities">Utilities</option> 
                 <option value="general">General</option>
+                <option value="Rent">Other</option>
 
             </select>
             </div>

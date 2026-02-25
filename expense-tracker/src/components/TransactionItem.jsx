@@ -1,37 +1,63 @@
+import { useState } from "react";
 import { useContext } from "react";
 import { CurrencyContext } from "../CurrencyContext";
 
-const TransactionItem = ({ transaction, onDelete, onEdit }) => {
-    const { formatMoney } = useContext(CurrencyContext);
-    const { id, title, amount, type, category } = transaction;
+const TransactionItem = ({ transaction, onDelete, onEdit, onArchive }) => {
+  const { formatMoney, currency } = useContext(CurrencyContext);
+  const { title, amount, type } = transaction;
 
-    return (
-        <div className="transaction-item">
-            <div>
-                <p className="title">{title}</p>
-                <span className="category">{category}</span>
-            </div>
+  const [showMenu, setshowMenu] = useState(false);
 
-            <span className={`amount ${type}`}>
-                {type === "expense" ? "-" : "+"}
-                {formatMoney(Math.abs(amount))}
-            </span>
+  const toggleMenu = () => {
+    setshowMenu(!showMenu);
+  };
 
-            <button 
-                className="delete-btn" 
-                onClick={() => onDelete(transaction.id)}
-            >
-                ✖
-            </button>
+  return (
+    <div
+      className={`transaction-item ${showMenu ? "open" : ""}`}
+      onClick={toggleMenu}
+    >
+      <div className="transaction-info">
+        <p>{transaction.title}</p>
 
-            <button 
-                className="edit-btn"
-                onClick={() => onEdit(transaction)}
-            >
-                Edit
-            </button>
+        <span className={`amount ${type}`}>
+          {type === "expense" ? "-" : "+"}
+          {formatMoney(Math.abs(amount), currency)}
+        </span>
+      </div>
+
+      {showMenu && (
+        <div className="transaction-actions">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(transaction);
+            }}
+          >
+            ✏️
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(transaction.id);
+            }}
+          >
+            🗑
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onArchive(transaction.id);
+            }}
+          >
+            📦
+          </button>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default TransactionItem;

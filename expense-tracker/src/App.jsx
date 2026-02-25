@@ -3,17 +3,27 @@ import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import TransactionList from "./components/TransactionList";
 import TransactionForm from "./components/TransactionForm";
-import Balance from "./components/Balance";
+import ExpenseChart from "./components/ExpenseChart";
 
 const App = () => {
   const [transactions, setTransactions] = useState([]);
   const [filterType, setFilterType] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [deletedTransaction, setDeletedTransaction] = useState(null);
+  const [deletedTransactions, setDeletedTransactions] = useState([]);
+  const [archivedTransactions, setArchivedTransactions] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [view, setView] = useState("active");
+
+  const displayedTransactions =
+    view === "archived"
+      ? archivedTransactions
+      : view === "deleted"
+        ? deletedTransactions
+        : transactions;
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -24,17 +34,42 @@ const App = () => {
     closeModal();
   };
 
-  const deleteTransaction = (id)=> {
+  const deleteTransaction = (id) => {
     const txToDelete = transactions.find((tx) => tx.id === id);
-    setDeletedTransaction(txToDelete);
-    setTransactions(transactions.filter((tx) => tx.id !== id));
+
+    if (!txToDelete) return;
+
+    setDeletedTransactions((prev) => [...prev, txToDelete]);
+    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+  };
+
+  const archiveTransaction = (id) => {
+    const txToArchive = transactions.find((tx) => tx.id === id);
+
+    if (!txToArchive) return;
+
+    setArchivedTransactions((prev) => [...prev, txToArchive]);
+    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+  };
+
+  const undoArchive = () => {
+    if (archivedTransactions.length === 0) return;
+
+    const lastArchived = archivedTransactions[archivedTransactions.length - 1];
+
+    setTransactions((prev) => [...prev, lastArchived]);
+
+    setArchivedTransactions((prev) => prev.slice(0, prev.length - 1));
   };
 
   const undoDelete = () => {
-    if (deletedTransaction) {
-      setTransactions([...transactions, deletedTransaction]);
-      setDeletedTransaction(null);
-    }
+    if (deletedTransactions.length === 0) return;
+
+    const lastDeleted = deletedTransactions[deletedTransactions.length - 1];
+
+    setTransactions((prev) => [...prev, lastDeleted]);
+
+    setDeletedTransactions((prev) => prev.slice(0, prev.length - 1));
   };
 
   const startEdit = (transaction) => {
@@ -44,38 +79,35 @@ const App = () => {
 
   const updateTransaction = (updatedTx) => {
     setTransactions((prevTransactions) =>
-        prevTransactions.map((tx) =>
-          tx.id === updatedTx.id ? updatedTx : tx
-      )
+      prevTransactions.map((tx) => (tx.id === updatedTx.id ? updatedTx : tx)),
     );
     closeModal();
     setEditingTransaction(null);
-  }
-
-  const formatMoney = (amount) => {
-    return new Intl.NumberFormat(
-      currencies[currency].locale,
-      {
-        style: "currency",
-        currency: currency,
-      }
-    ).format(amount);
   };
 
-  const income = transactions
-      .filter(tx => tx.amount > 0)
-      .reduce((acc, tx) => acc + tx.amount, 0);
-  
-  const expense = transactions
-      .filter(tx => tx.amount < 0)
-      .reduce((acc, tx) => acc + tx.amount, 0);
-  
+  const formatMoney = (amount, currency) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+      minimumFractionDigits: 2,
+    }).format(Number(amount) || 0);
+  };
+
+  const activeTransactions = transactions;
+
+  const income = activeTransactions
+    .filter((tx) => tx.amount > 0)
+    .reduce((acc, tx) => acc + tx.amount, 0);
+
+  const expense = activeTransactions
+    .filter((tx) => tx.amount < 0)
+    .reduce((acc, tx) => acc + tx.amount, 0);
+
   const balance = income + expense;
 
   const filteredTransactions = transactions.filter((tx) => {
-    const typeMatch =
-      filterType === "all" || tx.type === filterType;
-    
+    const typeMatch = filterType === "all" || tx.type === filterType;
+
     const categoryMatch =
       filterCategory === "all" || tx.category === filterCategory;
 
@@ -87,28 +119,26 @@ const App = () => {
     USD: { symbol: "$", locale: "en-US" },
     EUR: { symbol: "€", locale: "en-DE" },
     GBP: { symbol: "£", locale: "en-GB" },
-  }
+  };
 
   return (
     <div className="app-container">
-
-      <Header 
+      <Header
         balance={balance}
         currency={currency}
         setCurrency={setCurrency}
         formatMoney={formatMoney}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        onAddClick={() => setShowModal(true)} 
+        onAddClick={() => setShowModal(true)}
       />
 
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
-
             <TransactionForm
               editingTransaction={editingTransaction}
-              onAdd={(tx) => 
-                {addTransaction(tx);
+              onAdd={(tx) => {
+                addTransaction(tx);
                 closeModal();
               }}
               onUpdate={(tx) => {
@@ -125,10 +155,17 @@ const App = () => {
         </div>
       )}
 
-      {deletedTransaction && (
+      {deletedTransactions.length > 0 && (
         <div className="undo-notice">
-          Transaction deleted.{" "}
+          Transaction deleted.
           <button onClick={undoDelete}>Undo</button>
+        </div>
+      )}
+
+      {archivedTransactions.length > 0 && (
+        <div className="undo-notice">
+          Transaction archived.
+          <button onClick={undoArchive}>Undo</button>
         </div>
       )}
 
@@ -137,14 +174,14 @@ const App = () => {
           <Sidebar
             income={income}
             expense={expense}
-            balance={balance} 
+            balance={balance}
             filterType={filterType}
             setFilterType={setFilterType}
             filterCategory={filterCategory}
             setFilterCategory={setFilterCategory}
           />
         )}
-       
+
         {showFilters && (
           <div className="filter-panel">
             <select
@@ -165,23 +202,26 @@ const App = () => {
               <option value="transport">Transport</option>
               <option value="shopping">Shopping</option>
               <option value="salary">Salary</option>
-              <option value="utilities">Utilities</option> 
+              <option value="utilities">Utilities</option>
               <option value="general">General</option>
               <option value="other">Other</option>
             </select>
           </div>
         )}
-      <div className="content">
-        <TransactionList 
-          transactions={filteredTransactions}
-          onDelete={deleteTransaction}
-          onEdit={startEdit}
-        />
-      </div>
+        <div className="content">
+          <ExpenseChart income={income} expense={expense} />
+          <TransactionList
+            transactions={displayedTransactions}
+            formatMoney={formatMoney}
+            currency={currency}
+            onDelete={deleteTransaction}
+            onEdit={startEdit}
+            onArchive={archiveTransaction}
+          />
+        </div>
       </div>
     </div>
   );
-
 };
 
 export default App;

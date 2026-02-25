@@ -19,6 +19,20 @@ const TransactionForm = ({ onAdd, onUpdate, editingTransaction }) => {
       }
     }, [editingTransaction]);
 
+    const [currency, setCurrency] = useState("USD");
+
+    const currencySymbols = {
+      NGN:  "₦", 
+      USD:  "$", 
+      EUR:  "€", 
+      GBP:  "£", 
+    };
+
+    const formatNumber = (value) => {
+      if (!value) return "";
+      return Number(value).toLocaleString();
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -48,16 +62,25 @@ const TransactionForm = ({ onAdd, onUpdate, editingTransaction }) => {
 return (
     <form className="transaction-form" onSubmit={handleSubmit}>
       <input
+        className="title-input"
         type="text"
         placeholder="Enter description"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <input
-        type="number"
+        className="amount-input"
+        type="text"
         placeholder="Enter amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        value={
+          amount
+            ? `${currencySymbols[currency] || "$"} ${formatNumber(amount)}`
+            : ""
+        }
+        onChange={(e) => {
+          const rawValue = e.target.value.replace(/[^0-9]/g, "");
+          setAmount(rawValue);
+          }}
       />
 
       <select value={type} onChange={(e) => setType(e.target.value)}>
@@ -73,7 +96,7 @@ return (
         <option value="salary">Salary</option>
         <option value="utilities">Utilities</option> 
         <option value="general">General</option>
-        <option value="other">Other</option>
+        <option value="Rent">Other</option>
       </select>
 
       <button type="submit">
