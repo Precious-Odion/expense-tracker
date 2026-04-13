@@ -93,7 +93,9 @@ body {
   border-radius: 8px;
   margin-top: 12px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  align-items: center;
+  border-bottom: 1px solid #eee;
 }
 
 .amount.expense {
@@ -192,31 +194,40 @@ body {
   margin-bottom: 15px;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.transaction-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.transaction-actions button {
-  background: #222;
+.menu-btn {
+  background: none;
   border: none;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
+  font-size: 20px;
   cursor: pointer;
 }
-.transaction-actions button:hover {
-  background: green;
+
+.dropdown-menu {
+  position: absolute;
+  right: 10px;
+  bottom: -5px;
+  margin-top: 6px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  z-index: 1000;
+  padding: 6px 0;
+}
+
+.dropdown-menu button {
+  border: none;
+  background: transparent;
+  padding: 10px 14px;
+  text-align: left;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+.dropdown-menu button:hover {
+  background: #f5f5f5;
 }
 
 .hamburger {
@@ -303,10 +314,56 @@ body {
 }
 
 .chart {
-  background: #1a1a1a;
+  background: #1e1e1e;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 12px;
+}
+
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+.chart-header {
   margin-bottom: 20px;
-  width: 300px;
-  height: 300px;
+}
+
+.menu-wrapper {
+  position: relative;
+}
+
+.snackbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #323232;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 8px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  animation: slideUp 0.25s ease;
+}
+
+.snackbar button {
+  background: transparent;
+  border: none;
+  color: #4cafef;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 30px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }

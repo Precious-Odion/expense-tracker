@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useContext } from "react";
+import { TransactionContext } from "./TransactionContext";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import TransactionList from "./components/TransactionList";
@@ -6,13 +8,26 @@ import TransactionForm from "./components/TransactionForm";
 import ExpenseChart from "./components/ExpenseChart";
 
 const App = () => {
-  const [transactions, setTransactions] = useState([]);
+  const {
+    transactions,
+    archivedTransactions,
+    deletedTransactions,
+    editingTransaction,
+    addTransaction,
+    deleteTransaction,
+    archiveTransaction,
+    undoDelete,
+    undoArchive,
+    startEdit,
+    updateTransaction,
+    income,
+    expense,
+    balance,
+    undoAction,
+  } = useContext(TransactionContext);
   const [filterType, setFilterType] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [deletedTransactions, setDeletedTransactions] = useState([]);
-  const [archivedTransactions, setArchivedTransactions] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -25,65 +40,14 @@ const App = () => {
         ? deletedTransactions
         : transactions;
 
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
+  const openModal = () => {
+    setShowModal(true);
+  };
+  const closeModal = () => {
+    setShowModal(false);
+  };
 
   const [currency, setCurrency] = useState("USD");
-  const addTransaction = (transaction) => {
-    setTransactions([...transactions, transaction]);
-    closeModal();
-  };
-
-  const deleteTransaction = (id) => {
-    const txToDelete = transactions.find((tx) => tx.id === id);
-
-    if (!txToDelete) return;
-
-    setDeletedTransactions((prev) => [...prev, txToDelete]);
-    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
-  };
-
-  const archiveTransaction = (id) => {
-    const txToArchive = transactions.find((tx) => tx.id === id);
-
-    if (!txToArchive) return;
-
-    setArchivedTransactions((prev) => [...prev, txToArchive]);
-    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
-  };
-
-  const undoArchive = () => {
-    if (archivedTransactions.length === 0) return;
-
-    const lastArchived = archivedTransactions[archivedTransactions.length - 1];
-
-    setTransactions((prev) => [...prev, lastArchived]);
-
-    setArchivedTransactions((prev) => prev.slice(0, prev.length - 1));
-  };
-
-  const undoDelete = () => {
-    if (deletedTransactions.length === 0) return;
-
-    const lastDeleted = deletedTransactions[deletedTransactions.length - 1];
-
-    setTransactions((prev) => [...prev, lastDeleted]);
-
-    setDeletedTransactions((prev) => prev.slice(0, prev.length - 1));
-  };
-
-  const startEdit = (transaction) => {
-    setEditingTransaction(transaction);
-    openModal();
-  };
-
-  const updateTransaction = (updatedTx) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.map((tx) => (tx.id === updatedTx.id ? updatedTx : tx)),
-    );
-    closeModal();
-    setEditingTransaction(null);
-  };
 
   const formatMoney = (amount, currency) => {
     return new Intl.NumberFormat("en-US", {
@@ -92,18 +56,6 @@ const App = () => {
       minimumFractionDigits: 2,
     }).format(Number(amount) || 0);
   };
-
-  const activeTransactions = transactions;
-
-  const income = activeTransactions
-    .filter((tx) => tx.amount > 0)
-    .reduce((acc, tx) => acc + tx.amount, 0);
-
-  const expense = activeTransactions
-    .filter((tx) => tx.amount < 0)
-    .reduce((acc, tx) => acc + tx.amount, 0);
-
-  const balance = income + expense;
 
   const filteredTransactions = transactions.filter((tx) => {
     const typeMatch = filterType === "all" || tx.type === filterType;
@@ -136,16 +88,11 @@ const App = () => {
         <div className="modal-overlay">
           <div className="modal">
             <TransactionForm
+              key={editingTransaction ? editingTransaction.id : "new"}
               editingTransaction={editingTransaction}
-              onAdd={(tx) => {
-                addTransaction(tx);
-                closeModal();
-              }}
-              onUpdate={(tx) => {
-                updateTransaction(tx);
-                setEditingTransaction(null);
-                closeModal();
-              }}
+              onAdd={addTransaction}
+              onUpdate={updateTransaction}
+              closeModal={closeModal}
             />
 
             <button className="close-btn" onClick={closeModal}>
@@ -155,17 +102,14 @@ const App = () => {
         </div>
       )}
 
-      {deletedTransactions.length > 0 && (
-        <div className="undo-notice">
-          Transaction deleted.
-          <button onClick={undoDelete}>Undo</button>
-        </div>
-      )}
-
-      {archivedTransactions.length > 0 && (
-        <div className="undo-notice">
-          Transaction archived.
-          <button onClick={undoArchive}>Undo</button>
+      {undoAction && (
+        <div className="snackbar">
+          {undoAction === "delete"
+            ? "Transaction Deleted"
+            : "Transaction Archived"}
+          <button onClick={undoAction === "delete" ? undoDelete : undoArchive}>
+            Undo
+          </button>
         </div>
       )}
 
@@ -179,6 +123,7 @@ const App = () => {
             setFilterType={setFilterType}
             filterCategory={filterCategory}
             setFilterCategory={setFilterCategory}
+            setView={setView}
           />
         )}
 
@@ -204,20 +149,28 @@ const App = () => {
               <option value="salary">Salary</option>
               <option value="utilities">Utilities</option>
               <option value="general">General</option>
-              <option value="other">Other</option>
             </select>
           </div>
         )}
         <div className="content">
-          <ExpenseChart income={income} expense={expense} />
-          <TransactionList
-            transactions={displayedTransactions}
-            formatMoney={formatMoney}
-            currency={currency}
-            onDelete={deleteTransaction}
-            onEdit={startEdit}
-            onArchive={archiveTransaction}
-          />
+          {view === "charts" ? (
+            <>
+              <h2 className="chart-header">Charts</h2>
+              <ExpenseChart transactions={transactions} />
+            </>
+          ) : (
+            <TransactionList
+              transactions={displayedTransactions}
+              formatMoney={formatMoney}
+              currency={currency}
+              onDelete={deleteTransaction}
+              onEdit={(tx) => {
+                startEdit(tx);
+                setShowModal(true);
+              }}
+              onArchive={archiveTransaction}
+            />
+          )}
         </div>
       </div>
     </div>
