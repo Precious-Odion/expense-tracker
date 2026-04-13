@@ -1,65 +1,79 @@
 import { useState, useEffect } from "react";
 
-const TransactionForm = ({ onAdd, onUpdate, editingTransaction }) => {
-    const [title, setTitle] = useState("");
-    const [amount, setAmount] = useState("");
-    const [type, setType] = useState("income");
-    const [category, setCategory] = useState("General");
+const TransactionForm = ({
+  onAdd,
+  onUpdate,
+  editingTransaction,
+  closeModal,
+}) => {
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [type, setType] = useState("income");
+  const [category, setCategory] = useState("General");
 
-    useEffect(() => {
-      if (editingTransaction) {
-        setTitle(editingTransaction.title ?? "");
-        setAmount(
-          editingTransaction.amount !== undefined
-            ? Math.abs(editingTransaction.amount)
-            : ""
-        );
-        setType(editingTransaction.type ?? "income");
-        setCategory(editingTransaction.category ?? "General");
-      }
-    }, [editingTransaction]);
+  useEffect(() => {
+    if (editingTransaction) {
+      setTitle(editingTransaction.title ?? "");
+      setAmount(
+        editingTransaction.amount !== undefined
+          ? Math.abs(editingTransaction.amount).toString()
+          : "",
+      );
+      setType(editingTransaction.type ?? "income");
+      setCategory(editingTransaction.category ?? "General");
+    } else {
+      setTitle("");
+      setAmount("");
+      setType("income");
+      setCategory("General");
+    }
+  }, [editingTransaction]);
 
-    const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("USD");
 
-    const currencySymbols = {
-      NGN:  "₦", 
-      USD:  "$", 
-      EUR:  "€", 
-      GBP:  "£", 
+  const currencySymbols = {
+    NGN: "₦",
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+  };
+
+  const formatNumber = (value) => {
+    if (!value) return "";
+    return Number(value).toLocaleString("en-US");
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!title || !amount) return;
+
+    const transactionData = {
+      id: editingTransaction ? editingTransaction.id : Date.now(),
+      title: title,
+      amount: Number(amount) * (type === "expense" ? -1 : 1),
+      type: type,
+      category: category,
+      date: new Date().toISOString().split("T")[0],
     };
 
-    const formatNumber = (value) => {
-      if (!value) return "";
-      return Number(value).toLocaleString();
-    };
+    if (editingTransaction) {
+      onUpdate(transactionData);
+    } else {
+      onAdd(transactionData);
+    }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    if (closeModal) {
+      closeModal();
+    }
 
-        if (!title || !amount)  return;
-        
-        const transactionData = {
-          id: editingTransaction ? editingTransaction.id :Date.now(),
-          title: title,
-          amount: Number(amount) * (type === "expense" ? -1 : 1),
-          type: type,
-          category: category,
-          date: new Date().toISOString().split("T")[0],
-        };
+    setTitle("");
+    setAmount("");
+    setType("income");
+    setCategory("General");
+  };
 
-        if (editingTransaction) {
-          onUpdate(transactionData);
-        } else {
-          onAdd(transactionData);
-        }
-        
-        setTitle("");
-        setAmount("");
-        setType("income");
-        setCategory("General");
-    };
-
-return (
+  return (
     <form className="transaction-form" onSubmit={handleSubmit}>
       <input
         className="title-input"
@@ -80,7 +94,7 @@ return (
         onChange={(e) => {
           const rawValue = e.target.value.replace(/[^0-9]/g, "");
           setAmount(rawValue);
-          }}
+        }}
       />
 
       <select value={type} onChange={(e) => setType(e.target.value)}>
@@ -94,17 +108,15 @@ return (
         <option value="transport">Transport</option>
         <option value="shopping">Shopping</option>
         <option value="salary">Salary</option>
-        <option value="utilities">Utilities</option> 
+        <option value="utilities">Utilities</option>
         <option value="general">General</option>
-        <option value="Rent">Other</option>
       </select>
 
       <button type="submit">
         {editingTransaction ? "Update Transaction" : "Add Transaction"}
       </button>
     </form>
-);
-
+  );
 };
 
 export default TransactionForm;
